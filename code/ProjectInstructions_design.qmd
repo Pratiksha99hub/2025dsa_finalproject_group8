@@ -1,0 +1,237 @@
+---
+title: "Data Science Applied to Ag - Final Project - Design"
+author: "PRATIKSHA KOTKAR"
+format:
+  html:
+    code-fold: false
+    embed-resources: true
+    toc: true
+    number-sections: true
+    theme: cerulean
+---
+
+# Instructions
+
+This file contains both the **instructions** for the mid-term project and placeholders for your code. You are required to use this file to produce code, output, and answers to the questions below.
+
+Besides simply creating output, make sure to interpret the output. You will need to create tables and/or plots to arrive at the answers, and then comment on what you found below it.
+
+To get you setup, you will need to:
+
+-   Student #1: create a repository on your GitHub account. You can call this repository "2025dsa_finalproject_groupX", **where X is the number of your group**. Make it public, add a README, add a .gitignore for R.\
+-   Student #1: follow the steps we did in class to start a new RStudio project with version control.\
+-   Student #1: in your computer, create the sub-folders code, data, output, and move your data set into the `data` folder. Also, student 1 moves this current script into the `code` folder. Do a git stage, commit, push.\
+-   Student #1: on GitHub, go the repository settings and invite your partner to be a collaborator in the repository. That will give them push permission.\
+-   Now, both students should clone this repository on their computers like we did in class. Make sure this step works well and that you can pull and push from GitHub.\
+-   Student 2, after cloning, does a git pull to get all these updates on their computer.\
+-   Student 1 and 2 work together to update the README file. README files should explain what the repository is about, the goals of that project, who is working in it, and any other important details you may find.
+
+# Introduction
+
+The U.S. Food and Drug Administration requires all processors to submit a comprehensive list of scheduled processes before commercialization for each category of acidified food product. The globalization of the food industry has raised growing concerns about food security, particularly due to the lack of innovation and access to capital at local, small-scale levels. The limited understanding and inherent inconsistencies in quality control of largely manual, small-scale process engineering present significant challenges for manufacturers and entrepreneurs, especially since equipment-intensive thermal processing is typically the preferred method for ensuring acidified foods' shelf-life and microbial stability (De Vries et al., 2018). Alternatively, a cold-filling process under ambient conditions can also achieve microbial reduction due to the inherent properties, such as pH, and the FDA has permitted this process. However, a scientific challenge study based on the scheduled process must be provided, demonstrating the destruction of pathogens and spoilage microorganisms of concern for commercial sterility (FDA). The challenge study presents an additional financial burden for the small-scale entrepreneur. Consequently, the finite availability of published research on defined critical limits for cold-filled acidified products is an emerging concern of the industry (Breidt et al., 2018).
+
+Acidified foods are characterized as those foods with low-acid components, that are exposed to an acid environment, have a finished equilibrium pH of 4.6 or less, and final water activity (aw) of more than 0.85 (Breidt et al., 2018). These product segments are projected to increase consumption and prompt continued growth. As per the U.S. Food and Drug Administration and the acidified vegetable industry, the increasing concerns regarding foodborne disease outbreaks caused by vegetative cells of acid-resistant food pathogens are alarming (Breidt et al., 2007). Moreover, the work by Breidt and colleagues and promulgation of 21 CFR part 120, which requires manufacturers of juices to have a Hazard Analysis and Critical Control Point (HACCP) program, fruit juices such as apple cider and orange juice having pH values between 3.5 and 4.0 have been studied in response to outbreaks of disease from Escherichia coli O157:H7 and Salmonella enterica strains. A potential source of microbial contamination for cold-filled acid sauce and dressings has been linked to frozen or dried ingredient addition, such as spices, herbs, and onions, according to a survey conducted by Australian manufacturers (Chapman et al., 2013) The proposed work will encompass bridging the gap between the limited availability of research on the potential of organic acids for microbial inactivation. Finally, the study would evaluate conditions to provide a 5-log reduction on pathogenic Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes with a formal shelf-life analysis for the cold-fill-hold process to be selected as a thermal processing alternative.
+
+# Hypothesis and objectives
+
+Describe here your hypothesis, followed by your objectives. Make sure your hypothesis are testable and bold, and objectives are clear.
+
+Acid-resistant foodborne pathogens have caused outbreaks in acidified foods (pH \< 4.0), raising concerns over their microbial safety. Heat treatments for safety often compromise sensory quality, leading to interest in non-thermal alternatives like cold-fill-hold processes. Low pH and high organic acid concentration are essential for preventing microbial growth in acidified products. Organic acids, known for their low toxicity and antimicrobial properties, are commonly used for food preservation and decontamination. Achieving commercial sterility requires a 5-log reduction of resistant pathogens like Escherichia coli O157, Salmonella enterica, and Listeria monocytogenes in shelf-stable acidified foods, typically through hot-filling; cold-fill-hold processes also show potential for safety and stability ensured.
+
+## Objective and Central Hypothesis
+
+The primary objective of the study was testing and evaluating the effectiveness of a cold-fill-hold process using a lab-scale mayonnaise with or without sodium benzoate, acidified with 5.0% acetic acid, stored at 5°C and 25°C. Pathogen levels were monitored daily to determine holding times required for a 5-log reduction. All trials were performed in triplicate.
+
+The long-term objective is to develop a sustainable and economically beneficial process for growers and small food businesses who produce value-added products. This is important for sustaining rural farmers and providing them with a steady income stream during famine or the off-season. The proposed work aims to determine the time required for a 5-log reduction on pathogenic Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes in laboratory-scale prepared acidified mayonnaise. The central hypothesis of the study is that cold-filling in acid and acidified food by the action of temperature, time, formulation type and pH using organic acids can inactivate Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes, thereby causing a 5-log reduction.
+
+## To test our central hypothesis, we have the following specific aims:
+
+1)  Determine the effectiveness of **different formulations using acetic acid, with and without addition of 0.1% sodium benzoate** on microbial inactivation of Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes in acidified mayonnaise stored at **25°C and 5°C**,
+2)  Determine the **inactivation at constant acid concentrations of 5%** for a complete 5-Log reduction of pathogenic Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes.
+3)  Determine the **acid resistance** for Escherichia coli O157:H7, Salmonella enterica, and Listeria monocytogenes in acidified mayonnaise by comparing **D-values and z-values**.
+
+# Material and Methods
+
+Describe here your overall material and methods as it pertains to the analysis you will conduct, including study description, site/setup description, what equipment was used, etc. just like you would in a paper. Make sure to clearly explain what was measured and how.
+
+A.  **Preparation of Mayonnaise samples**
+
+    Grade A table eggs (approximately 54 g each) and neutral vegetable oil (Kroger, Pure Canola Oil) were sourced from a major supermarket. Acidification was achieved using acetic acid (Kroger, Distilled White Vinegar) with 5% acid concentrations. Two formulations were tested for the study, one with 5% acetic acid and the second with the addition of 0.1% Sodium Benzoate as the preservative. To prepare the acidifying solution, specific volumes of deionized (D.I.) water and acid were mixed to reach a total volume of 25 mL (25 g), ensuring an acid concentration of 5.0%. A target acid concentration of 5% was selected to simulate conditions that a small processor would likely use. The acid mixture was transferred to a glass jar for blending. The egg and egg yolk were combined with the acidifying solution and agitated continuously using an immersion blender until thoroughly mixed. Vegetable oil (220 mL, approximately 186 g) was gradually incorporated in a thin stream while the immersion blender operated at full speed. This process ensured proper emulsification and yielded a smooth, homogenous consistency. The mixture was blended until it thickened to match the texture of commercially prepared mayonnaise. After preparation, the mayonnaise was allowed to stand for 30–60 minutes at room temperature to stabilize the pH.
+
+B.  **pH and Titratable acidity**
+
+    The pH of the prepared mayonnaise formulation was measured with precision using a calibrated pH meter (Fisherbrand, Accumet AB315 pH/mV), ensuring the accuracy of our experimental conditions. Titratable acidity (TA) was quantified and expressed as acetic acid based on the acidifier used in the formulation. For analysis, 10 g of the sample was accurately weighed into a 150 mL beaker, and titration was performed using 0.1N sodium hydroxide (NaOH), with the endpoint determined at pH 8.2. The volume of NaOH consumed was recorded and converted to the percentage of acetic acid equivalent. An expected titration range of 5–15 mL of 0.1N NaOH was anticipated. If the NaOH consumption deviated from this range, the sample amount was adjusted accordingly to ensure accurate titration results. The following equation was used to calculate the percentage of acetic acid in the samples.
+
+    ![](images/clipboard-1444558685.png){width="323" height="62"}
+
+C.  **Preparation of cultures and induction of rifampicin resistance**
+
+    This study used five cultures of Salmonella enterica, E. coli O157:H7, and Listeria monocytogenes isolated from fresh produce outbreaks (Table 1). Rifampicin resistance was induced because preliminary results showed substantial background microflora interfering with microbial analysis. Each culture was prepared independently and later pooled to form a single 5-strain cocktail for separate inoculations of each organism. The frozen stock culture of rifampicin-resistant strains was revived by streaking a loopful of each culture onto rifampicin (80 µg/mL) -supplemented TSA plates (TSA-R). The plates were incubated at 37 ± 2°C for 24 ± 3 h. After incubation, the strains were transferred using a 10 µL sterile loop into 9 mL of sterile tryptic soy broth supplemented with rifampicin (80 µg/mL) (TSB-R), followed by incubation at 37 ± 2°C for 24 ± 3 h. The second overnight culture (0.1 mL) was then transferred onto TSA-R plates and incubated at 37 ± 2°C for 24 ± 3 h. The resulting bacterial lawn was collected by adding 3 ml of 0.1 % peptone water to each plate and loosening the lawn with a sterile spreader to create a liquid culture. Each strain was removed from the plate (1 ml) and placed into a sterile container, and all strains for one organism were pooled, resulting in a 5 ml inoculum volume.
+
+D.  **Inoculation**
+
+    Mayonnaise samples (approximately 150g) were inoculated with a cocktail of five strains of harvested bacterial inoculum (5 mL total), followed by thorough mixing for a uniform suspension. The inoculated sample was transferred to a sterile glass jar and sealed with 2-piece metal lids. No heat treatment was applied, and jars were stored at 5°C and 25°C during sampling. Controls consisted of mayonnaise to which sterile peptone water was added instead of inoculum, and an inoculated control was prepared, where instead of adding acid, only sterile DI water was used to prepare the sample. Except for formulations subjected to microbiological analyses on day 0 (within 30 min after inoculation), control mayonnaise formulations were immediately placed in the refrigerator.
+
+E.  **Enumeration and colony counting**
+
+    Samples were enumerated immediately after inoculation to determine the initial concentration of the pathogen. Containers were removed from the incubator and subjected to enumeration every 8 hours for up to 96 hours for samples stored at 25°C and every 24 hours until 360 hours (15 days) for Salmonella enterica and E. coli O157:H7 when stored at 5°C. Similarly, Listeria monocytogenes, when stored at 5°C, was enumerated every 8 hours for up to 80 hours. The samples stored at 5°C and 25°C were tested until no colonies were present when plated at the lowest dilution, except for Salmonella enterica and E. coli O157:H7. After sampling, containers were returned to the incubator until the next sampling time. Each sample (1 mL) was subjected to serial dilutions in sterile 0.1% peptone water, and 0.1 mL was plated in duplicate on TSA-R. Agar plates were inverted and incubated at 37 ± 2°C for 24 h for Salmonella enterica and E. coli O157:H7 strains for 24 hours and for 48 hours for Listeria monocytogenes strains. After incubation, colonies on plates were counted, with values between 25 and 250 CFU converted to log CFU/g. Counts below 25 CFU were adjusted to the limit of quantification (2.4 log CFU/g).
+
+## Study design
+
+This study was conducted to evaluate the influence of formulation, storage temperature, time, and pathogen type on microbial inactivation, specifically measuring the time required to achieve a 5-log reduction in population across different treatment conditions. The design included both a structured treatment layout and experimental replication.
+
+#### A. **Treatment Design (Independent Variables)**
+
+1.  Time
+
+-   25°C: Enumeration every 8 hours, up to 96 hours.
+
+-   5°C:
+
+-   Salmonella enterica and E. coli O157:H7: Enumeration every 24 hours, up to 360 hours (15 days).
+
+-   Listeria monocytogenes: Enumeration every 8 hours, up to 80 hours.
+
+2.  **Storage Temperature**
+
+-   Two levels: 5°C and 25°C
+
+3.  **Formulation**
+
+-   A: 5.0% Acetic acid
+
+-   B: 5.0% Acetic acid + 0.1% Sodium benzoate
+
+-   NA: No acid control (included only for comparison, with a single replication)
+
+4.  **Pathogen**
+
+-   Salmonella enterica
+
+-   E. coli O157:H7
+
+-   Listeria monocytogenes
+
+#### B. **Dependent Variable**
+
+Microbial reduction (Log CFU/ml) over time, with the primary outcome being the estimated time to achieve a 5-log reduction.
+
+#### C. **Experimental Design**
+
+-   Each treatment condition (combination of formulation, temperature, and pathogen) was replicated three times, except for the NA (no acid) formulation, which was tested once per condition.
+
+-   Replicates were treated as blocks to control for variability in experimental runs.
+
+-   Randomization was applied to the assignment of treatments across blocks to minimize experimental bias.
+
+#### D. **Experimental Scale Standard Conditions (Formulations A & B)**
+
+-   2  Temperatures × 2  Formulations × 3  Pathogens × 3  Replications = 36   samples
+
+-   Additional Conditions (Formulation NA): 2  Temperatures × 1  Formulation (NA) × 3  Pathogens × 1  Replication = 6   samples
+
+## Statistical analysis
+
+Describe here your statistical analysis, including what type of ANOVA model you ran (based on the design above), what was your response variable, what were your explanatory variables and how were the explanatory variables treated (random or fixed). Provide your alpha level. Explain which function from which package you used to analyze this data. Explain how you checked linear model assumptions and whether or not they were met. Overall, make sure you explain in sufficient detail that, if given your data, a knowledgeable person would be able to reproduce your analysis exactly.
+
+Three independent experiments were conducted using three separate batches of each mayonnaise formulation. Pathogen reduction was assessed by comparing log reductions across different formulations, considering variables such as acid type, preservative presence, organism, and storage temperature (5°C or 25°C). Microbial inactivation was evaluated by analysing survival curves of CFU/g over time. After incubation, colonies on plates were counted, with values between 25 and 250 CFU converted to log CFU/g. Counts below 25 CFU were adjusted to the limit of quantification (2.4 log CFU/g). To estimate the time required for a 5-log reduction, the D-value (negative reciprocal of the inactivation curve slope) was multiplied by 5. Statistical analysis was performed using R software (R version 4 4 2) using type III ANOVA with Satterthwaite's method, and pairwise comparisons were tested using the Tukey test with a least significant difference (P ≤ 0.0001) to identify important factors influencing pathogen populations across different experimental conditions.
+
+# Results
+
+Here is where the coding is going to happen, and it will be completely up to you. Include under this section as many sub-sections (using ##) and as many chunks needed to create the analytical workflow for your analysis, starting at loading packages and data, wrangling, EDA, modeling, assumptions checking, ANOVA table, means, pairwise comparisons, and final publication-quality plot.
+
+Make sure to run a model that reflects your study design. Even if your study design does not include one of the designs covered in class, you are still expected to run the most appropriate model. If you need help for references, let me know.
+
+Before each chunk, describe the steps being performed in that chunk. For example, "Here I will load the data".
+
+If a chunk produces output, like printing a data frame, statistical summary, a plot, ANOVA table, etc., make sure to write text interpreting what you see and how you can/will use that information to move forward to the next steps in the workflow.
+
+#Load the libraries
+```{r setup, include=FALSE}
+## Load necessary libraries
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(car)
+library(multcomp)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+```
+
+#1) Read data
+```{r read-data}
+data <- read_excel("../data/Results_labscale.xlsx")
+
+data
+```
+
+This study was a randomized complete block design (RCBD) with three blocks (Reps).  
+
+The treatment factor are as follows:
+Pathogen: Three levels (Salmonella enterica, E. coli O157:H7 and Listeria monocytogenes)
+Temperature: Two levels (5c and 25C)
+Formulation: Three levels (A, B and NA)
+
+The response variable was log reduction in Log(CFU/g). 
+
+#Conversion of parameters to factor
+```{r}
+data$Pathogen <- as.factor(data$Pathogen)
+data$Formulation <- as.factor(data$Formulation)
+data$Rep <- as.factor(data$Rep)
+data$Temp <- as.factor(data$Temp)
+```
+
+# 2)Data EDA
+```{r}
+summary(data)
+```
+The time ranges from 0 hours to 1104 hours.
+The LogCFU ranging from 2.4(limit of quantification) to 8.22 Log(CFU/g)
+
+#Checking with density plot
+```{r reg plot point + smooth}
+ggplot(data, 
+       aes(x = Time, 
+           y = LogCFU)) +
+  geom_point() +
+  geom_smooth()
+```
+
+# Team work in GitHub
+
+Whether you are working with your future-self or as duos, make sure to stage, commit, and push after finishing each of the sub-sections above. When committing, write commit messages that are short and descriptive (e.g., finished wrangling).
+
+If you are working in duos, make sure to split the workload. I will check your collaborative work through the commit history, and if one student has contributed significantly more than the other, than that will impact grades.
+
+**Tip 1**: to avoid merge conflicts, make sure to **pull** first, and then start working locally. That will ensure that any changes made by your partner will be "downloaded" before you make changes to the files locally.
+
+**Tip 2**: make use of the Issues on this repository to set up to-do lists and assign tasks to different people. You can also use each issue/task to discuss how things should be run and get to an agreement.
+
+# Submitting your work
+
+Once you have developed all the code and answers, make sure to Render this quarto file.
+
+**Notes on rendering**:
+
+-   Make sure to render your work and inspect how the final html look like.\
+-   If it does not look professional for whatever reason, then fix the issue, re-render it, recheck.\
+-   Only send me your work once your html file looks professional.\
+-   Some potential issues you may encounter and how to fix them:
+    -   Some times your code may be creating a table output that is waaay to long and cumbersome to scroll through when rendered. If this is the case, make it more professional looking by using the `head()` function to only print the first handful of rows (instead of thousands of rows).
+
+    -   **DO NOT** delete the file's heading levels (# and ##). They set up the proper heading 1 and 2 levels, and I use them to guide my grading.
+
+    -   If a given chunk is also outputting warnings or messages, inhibit this behavior by changing the chunk options `message` and `warning` to `FALSE`.
+
+    -   If, after rendered, 2 lines of text are connected and you wish to "break line" between them, add 2 extra spaces after the first one.
+
+After rendering, an .html file will be created on your `code` folder.
+
+Rename this file to `LASTNAME1-LASTNAME2_finalproject.html`.\
+For ex., `Bastos-Mendes_finalproject.html`.
+
+Submit the html file on eLC by **April 30th** 11:59 pm.
