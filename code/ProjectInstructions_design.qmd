@@ -148,24 +148,35 @@ If a chunk produces output, like printing a data frame, statistical summary, a p
 
 #Load the libraries
 ```{r setup, include=FALSE}
+#| message: false
+#| warning: false
+
 ## Load necessary libraries
 library(readxl)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(tidyverse)
 library(purrr)
 library(car)
 library(multcomp)
 library(lme4)
 library(lmerTest)
 library(emmeans)
+library(broom.mixed)
+library(nlme)
+library(nlraa)
+library(metrica)
 ```
 
-#1) Read data
+#1) Reading data and data wrangling
 ```{r read-data}
-data <- read_excel("../data/Results_labscale.xlsx")
-
-data
+labscale <- read_excel("../data/Results_labscale.xlsx") %>%
+  mutate(Rep = factor(Rep),
+         Pathogen = factor(Pathogen),
+         Formulation = factor(Formulation),
+         Temp = factor(Temp))
+labscale
 ```
 
 This study was a randomized complete block design (RCBD) with three blocks (Reps).  
@@ -175,30 +186,353 @@ Pathogen: Three levels (Salmonella enterica, E. coli O157:H7 and Listeria monocy
 Temperature: Two levels (5c and 25C)
 Formulation: Three levels (A, B and NA)
 
-The response variable was log reduction in Log(CFU/g). 
+Here, treating Rep as a blocking factor (including it as a random effect) since it was used to control experimental variability (like trials on different formulations, temperatures, and pathogens).
 
-#Conversion of parameters to factor
-```{r}
-data$Pathogen <- as.factor(data$Pathogen)
-data$Formulation <- as.factor(data$Formulation)
-data$Rep <- as.factor(data$Rep)
-data$Temp <- as.factor(data$Temp)
-```
+The response variable was log reduction in Log(CFU/g). 
 
 # 2)Data EDA
 ```{r}
-summary(data)
+summary(labscale)
 ```
 The time ranges from 0 hours to 1104 hours.
 The LogCFU ranging from 2.4(limit of quantification) to 8.22 Log(CFU/g)
 
 #Checking with density plot
 ```{r reg plot point + smooth}
-ggplot(data, 
+ggplot(labscale, 
        aes(x = Time, 
            y = LogCFU)) +
   geom_point() +
   geom_smooth()
+```
+# 3) Intercept-only 
+## a) Model  
+```{r mod1_int}
+# Changing to sum-to-zero contrast
+options(contrasts = c("contr.sum", "contr.poly"))
+
+# Model fitting
+mod1_int <- lmer(LogCFU ~ (1|Rep),
+                 data = labscale
+                 )
+
+# Summary
+summary(mod1_int)
+
+```
+## b) Model Assumptions
+```{r mod1 augmenting}
+#| message: false
+#| warning: false
+
+# Augmenting and adding perason standardized residuals
+mod1_int_aug <- augment(mod1_int) %>%
+  mutate(.stdresid = resid(mod1_int, 
+                           type = "pearson", 
+                           scaled = T)) %>%
+  left_join(labscale)
+
+
+mod1_int_aug
+```
+
+### Within-group errors are iid ~ N(0, var2)
+
+```{r mod1 Standardized Residuals vs. Fitted}
+#| message: false
+#| warning: false
+
+ggplot(mod1_int_aug, 
+       aes(x = .fitted, 
+           y = .stdresid))+
+  geom_hline(yintercept = 0, 
+             color = "red")+
+  geom_point(size = 3, 
+             alpha = .7)+
+  geom_smooth()
+```
+The residual distribution looks odd, hence we test the q-q plot
+
+```{r mod1 Quantile-Quantile}
+ggplot(mod1_int_aug, 
+       aes(sample = .stdresid))+
+  stat_qq()+
+  stat_qq_line()
+```
+The residuals are wildly distorted at the tails
+
+### Random effects are iid ~ N(0,var1)
+
+On this plot, looking for normality.
+
+```{r mod1 QQ plot for Location:fRep random effects}
+mod1_int_randeff <- ranef(mod1_int)[[1]] 
+
+ggplot(mod1_int_randeff, 
+       aes(sample = `(Intercept)`))+
+  stat_qq()+
+  stat_qq_line()
+
+```
+Since, there are only few observations, the data looks good
+
+## c) Model summary
+
+```{r mod1 ANOVA}
+summary(mod1_int)
+```
+The intercept is quite significant at 0.01
+
+## d) Final plot  
+
+```{r mod1 final plot}
+ggplot(mod1_int_aug, 
+       aes(x = Time, 
+           y = LogCFU))+
+  geom_point(size = 3, 
+             alpha = .7) +
+geom_line(aes(y = .fixed))
+```
+Here, since the residuals look distorted and unusual, we try different model
+
+#4) Linear regression model
+
+Now, taking into account the main effects of Pathogen, Formulation, Time and Temperature, here we consider interactions of Time with the other variables (since microbial inactivation happens over time and differs between treatments). ALso, Rep as a random effect.
+
+##a)Perform a 3-way ANOVA
+```{r 3-way ANOVA}
+library(lmerTest)
+mod2_lin <- lmer(LogCFU ~ Pathogen * Formulation * Temp * Time + (1|Rep), data = labscale)
+anova(mod2_lin, type = 3)
+```
+Now,
+The 3-way ANOVA helps to statistically confirm that:
+
+1) Specific combinations of formulation, temperature, and pathogen behave differently,
+
+2) The combined effect of the main effects is statistically significant over time,
+
+3) Also, all the factors are critical for driving microbial inactivation in the study.
+
+
+##b) Model Assumptions
+```{r mod2 augmenting}
+# Augmenting and adding perason standardized residuals
+mod2_lin_aug <- augment(mod2_lin) %>%
+  mutate(.stdresid = resid(mod2_lin, 
+                           type = "pearson", 
+                           scaled = T)) %>%
+  left_join(labscale)
+
+
+mod2_lin_aug
+```
+
+### Within-group errors are iid ~ N(0, var2)
+
+```{r mod2 Standardized Residuals vs. Fitted}
+ggplot(mod2_lin_aug, 
+       aes(x = .fitted, 
+           y = .stdresid))+
+  geom_hline(yintercept = 0, 
+             color = "red")+
+  geom_point(size = 3, 
+             alpha = .7)+
+  geom_smooth()
+```
+
+```{r mod2 Quantile-Quantile}
+ggplot(mod2_lin_aug, 
+       aes(sample = .stdresid))+
+  stat_qq()+
+  stat_qq_line()
+```
+Here, the residuals look almost linear with few outliers at the tail.
+
+### Random effects are iid ~ N(0,var1)
+
+On this plot, looking for normality.
+
+```{r mod2 QQ plot for Location:fRep random effects}
+mod2_lin_randeff <- ranef(mod2_lin)[[1]] 
+
+ggplot(mod2_lin_randeff, 
+       aes(sample = `(Intercept)`))+
+  stat_qq()+
+  stat_qq_line()
+
+```
+## c) Model summary
+
+```{r mod2 ANOVA}
+summary(mod2_lin)
+```
+Here intercept is highly significant!
+
+#5) Testing emmeans and pairwise comparisons
+
+##a)emmeans
+
+```{r}
+# Estimated marginal means
+emmeans_results <- emmeans(mod2_lin, ~ Pathogen * Formulation * Temp)
+
+emmeans_results
+```
+
+We test emmeans, as it calculates the mean predicted LogCFU for every Pathogen × Formulation × Temp combination. This helps summarize the effect of combinations in a way that accounts for unbalanced data and covariates (like Time).
+
+##b)Tukey test
+
+```{r}
+tukey_results <- pairs(emmeans_results)
+
+head(tukey_results)
+```
+Here we compare microbial reductions (or slopes/D-values) across different formulations, temperatures, and pathogens. This test helps determine which exact combinations differ.
+
+#6) Getting slope estimates to determine D-value
+
+##a)Fetching slope estimates
+
+```{r slope}
+slope_estimates <- emtrends(mod2_lin, ~ Pathogen * Formulation * Temp, var = "Time")
+slope_estimates
+```
+##b)Filter to get initial population (assuming Time = 0 is your starting point)
+
+```{r initialcount}
+initial_population <- labscale %>%
+  dplyr::filter(Time == 0) %>%
+  group_by(Pathogen, Formulation, Temp) %>%
+  summarise(Initial_LogCFU = mean(LogCFU, na.rm = TRUE), .groups = "drop")
+
+# View the table
+print(initial_population)
+
+```
+
+##c)Calculating slope, D-value, and initial LogCFU for each Pathogen-Formulation-Temp combination
+
+```{r d-values}
+D_values_full <- labscale %>%
+  group_by(Pathogen, Formulation, Temp) %>%
+  nest() %>%
+  mutate(
+    # Initial LogCFU at Time = 0
+    Initial_LogCFU = map_dbl(data, ~ mean(.x$LogCFU[as.numeric(.x$Time) == 0], na.rm = TRUE)),
+    
+    # Linear regression model
+    lm_model = map(data, ~ lm(LogCFU ~ as.numeric(Time), data = .x)),
+    
+    # Slope extraction
+    Slope = map_dbl(lm_model, ~ coef(.x)[2]),
+    
+    # D-value and estimated time for 5-log reduction
+    D_value = ifelse(Slope != 0, -1 / Slope, NA),
+    Time_5log = ifelse(Slope != 0, 5 / abs(Slope), NA)
+  ) %>%
+  dplyr::select(Pathogen, Formulation, Temp, Initial_LogCFU, Slope, D_value, Time_5log)
+
+# View table
+D_values_full
+```
+
+##d) Calculating z-values
+```{r}
+#| message: false
+#| warning: false
+library(dplyr)
+
+# First ensure Temp is numeric (create a numeric copy if needed)
+D_values_fixed <- D_values_full %>%
+  mutate(Temp_num = as.numeric(as.character(Temp)))
+
+# Now calculate Z-values safely
+z_values <- D_values_fixed %>%
+  filter(Temp_num %in% c(5, 25)) %>%
+  group_by(Pathogen, Formulation) %>%
+  filter(n() == 2) %>%
+  summarise(
+    Temp1 = min(Temp_num),
+    Temp2 = max(Temp_num),
+    D1 = D_value[Temp_num == Temp1],
+    D2 = D_value[Temp_num == Temp2],
+    Z_value = (Temp2 - Temp1) / (log10(D1) - log10(D2)),
+    .groups = "drop"
+  )
+
+# View results
+z_values
+
+
+```
+
+#7) Plotting log reduction over time for each formulation-temperature combination
+```{r plot}
+#| message: false
+#| warning: false
+library(ggthemes)
+
+# Consistent colors and shapes
+pathogen_colors <- c(
+  "Listeria" = "#1b9e77",
+  "Salmonella" = "#d95f02",
+  "E.coli" = "#7570b3"
+)
+pathogen_shapes <- c(
+  "Listeria" = 16,   # solid circle
+  "Salmonella" = 17, # triangle
+  "E.coli" = 15      # square
+)
+
+plot_list_temp_form <- list()
+combinations <- labscale %>% distinct(Formulation, Temp)
+
+for (i in 1:nrow(combinations)) {
+  f <- combinations$Formulation[i]
+  t <- combinations$Temp[i]
+  label <- paste("Formulation", f, "at", t, "\u00B0C")
+
+  p <- ggplot(labscale %>% filter(Formulation == f, Temp == t),
+              aes(x = as.numeric(Time), y = LogCFU, color = Pathogen, shape = Pathogen)) +
+    geom_point(size = 3, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE, aes(group = Pathogen), linewidth = 1) +
+    scale_color_manual(values = pathogen_colors) +
+    scale_shape_manual(values = pathogen_shapes) +
+    labs(
+      title = paste("Log Reduction -", label),
+      x = "Time (Hours)",
+      y = "Log (CFU/g)",
+      color = "Pathogen",
+      shape = "Pathogen"
+    ) +
+    theme_calc(base_size = 14, base_family = "sans") +
+    theme(
+      plot.title = element_text(hjust = 0.5, family = "serif", face = "bold", size = 16),
+      legend.position = "top",
+      legend.direction = "horizontal",
+      legend.justification = "center",
+      legend.box = "horizontal",
+      legend.background = element_rect(fill = "gray95", color = "black"),
+      legend.margin = margin(t = 2, b = 2, l = 5, r = 5),
+      legend.box.margin = margin(2, 2, -5, 2),
+      legend.text = element_text(size = 10),
+      legend.title = element_text(size = 11, face = "bold"),
+      panel.grid.major = element_line(color = "gray85"),
+      panel.grid.minor = element_line(color = "gray90"),
+      plot.margin = margin(5, 10, 5, 10)  # Top, Right, Bottom, Left
+    ) +
+    guides(
+      color = guide_legend(nrow = 1, override.aes = list(size = 3)),
+      shape = guide_legend(nrow = 1, override.aes = list(size = 3))
+    )
+
+  plot_list_temp_form[[label]] <- p
+}
+
+# Display all polished plots
+print(plot_list_temp_form)
 ```
 
 # Team work in GitHub
